@@ -1,0 +1,24 @@
+{
+  "name": "mpv.d.ts",
+  "version": "0.0.0",
+  "description": "TypeScript definitions for mpv JavaScript API",
+  "types": "mpv.d.ts",
+  "type": "module",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kagami/mpv.d.ts.git"
+  },
+  "keywords": [
+    "mpv",
+    "mpv-script",
+    "typescript",
+    "types"
+  ],
+  "author": "Kagami Hiiragi",
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/Kagami/mpv.d.ts/issues"
+  },
+  "homepage": "https://github.com/Kagami/mpv.d.ts#readme"
+}
