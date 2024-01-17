@@ -13,6 +13,7 @@ declare global {
     commandv(...args: string[]): true | undefined;
     command_native(table: MP.CommandArgs): unknown;
     command_native_async(table: MP.CommandArgs, fn?: (success: boolean, result: unknown, error: string) => void): number;
+    abort_async_command(id: number): void;
 
     last_error(): string;
 
@@ -31,16 +32,25 @@ declare global {
       get_user_path(path: string): string;
       split_path(path: string): [string, string];
       join_path(p1: string, p2: string): string;
+      read_file(fname: string, max?: number): string;
+      write_file(fname: string, str: string): void;
+      append_file(fname: string, str: string): void;
+      [key: string]: any; // TODO(Kagami): remove
     };
 
-    // TODO(Kagami): remove
-    [key: string]: any;
+    [key: string]: any; // TODO(Kagami): remove
   };
 
-  // MuJS doesn't have DOM API but implements few functions such as setTimeout.
+  function print(...msg: unknown[]): void;
+  function dump(...msg: unknown[]): void;
+  function exit(): void;
+
+  // MuJS doesn't have DOM API but mpv provides few functions such as setTimeout.
   // https://github.com/microsoft/TypeScript/blob/main/src/lib/dom.generated.d.ts
   function setInterval(handler: string | Function, timeout?: number, ...arguments: any[]): number;
   function setTimeout(handler: string | Function, timeout?: number, ...arguments: any[]): number;
+  function clearInterval(id: number | undefined): void;
+  function clearTimeout(id: number | undefined): void;
 }
 
 // Auxiliary types are kept in separate namespace to not be confused with official API.
@@ -134,8 +144,6 @@ export namespace MP {
     is_file: boolean;
     is_dir: boolean;
   }
-
-  function abort_async_command(t: unknown): void;
 
   function get_property_osd(name: string, def?: string): string;
 
@@ -259,29 +267,13 @@ export namespace MP {
 
     function file_info(path: string): FileInfo | undefined;
 
-    function split_path(path: string): [string, string];
-
-    function join_path(p1: string, p2: string): string;
-
     function getpid(): number;
 
     function getenv(name: string): string | undefined;
-
-    function get_user_path(path: string): string;
-
-    function read_file(fname: string, max?: number): string;
-
-    function write_file(fname: string, str: string): void;
 
     function compile_js(
       fname: string,
       content_str: string
     ): (...args: unknown[]) => unknown;
   }
-}
-
-declare function print(...msg: unknown[]): void;
-
-declare function dump(...msg: unknown[]): void;
-
-declare function exit(): void;*/
+}*/
