@@ -15,6 +15,11 @@ declare global {
     command_native_async(table: MP.CommandArgs, fn?: (success: boolean, result: unknown, error: string) => void): number;
     abort_async_command(id: number): void;
 
+    get_opt(key: string): string;
+
+    get_script_name(): string;
+    get_script_file(): string;
+
     last_error(): string;
 
     msg: {
@@ -216,10 +221,6 @@ export namespace MP {
 
   function unobserve_property(fn: (...args: unknown[]) => void): void;
 
-  function get_opt(key: string): string;
-
-  function get_script_name(): string;
-
   function osd_message(text: string, duration?: number): void;
 
   function register_idle(fn: () => void): void;
@@ -244,8 +245,6 @@ export namespace MP {
   function last_error(): string;
 
   function get_time_ms(): number;
-
-  function get_script_file(): string;
 
   let module_paths: string[];
 
