@@ -9,8 +9,10 @@ declare global {
     get_property(name: string): string | undefined;
     get_property(name: string, def: string): string;
 
-    command_native(table: MP.NodeArray | MP.NodeMap): void;
-    command_native_async(table: MP.NodeArray | MP.NodeMap, fn?: (success: boolean, result: unknown, error: string) => void): number;
+    command(command: string): true | undefined;
+    commandv(...args: string[]): true | undefined;
+    command_native(table: MP.CommandArgs): unknown;
+    command_native_async(table: MP.CommandArgs, fn?: (success: boolean, result: unknown, error: string) => void): number;
 
     last_error(): string;
 
@@ -23,6 +25,12 @@ declare global {
       verbose(...msg: unknown[]): void;
       debug(...msg: unknown[]): void;
       trace(...msg: unknown[]): void;
+    };
+
+    utils: {
+      get_user_path(path: string): string;
+      split_path(path: string): [string, string];
+      join_path(p1: string, p2: string): string;
     };
 
     // TODO(Kagami): remove
@@ -46,7 +54,9 @@ export namespace MP {
   type LogLevel = "fatal" | "error" | "warn" | "info" | "v" | "debug" | "trace";
   type Platform = "windows" | "darwin" | "linux" | "android" | "freebsd" | string;
 
-  interface SubprocessArgs {
+  type CommandArgs = NodeArray | (NodeMap & { name: string });
+  type SubprocessArgs = {
+    name: "subprocess";
     args: string[];
     playback_only?: boolean;
     capture_size?: number;
@@ -56,7 +66,7 @@ export namespace MP {
     env?: string[];
     stdin_data?: string;
     passthrough_stdin?: boolean;
-  }
+  };
   interface SubprocessResult {
     status: number;
     stdout: string;
@@ -124,10 +134,6 @@ export namespace MP {
     is_file: boolean;
     is_dir: boolean;
   }
-
-  function command(command: string): true | undefined;
-
-  function commandv(...args: readonly string[]): true | undefined;
 
   function abort_async_command(t: unknown): void;
 
