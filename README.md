@@ -30,5 +30,5 @@ You can also import auxiliary types which are not part of the official API but p
 ```typescript
 import type { MP } from "mpv.d.ts";
 
-const encoders = mp.get_property_native("encoder-list") as MP.Encoder[];
+const encoders = mp.get_property_native("encoder-list") as MP.Prop.Encoder[];
 ```

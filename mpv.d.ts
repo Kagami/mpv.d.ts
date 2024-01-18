@@ -1,9 +1,10 @@
-// Types for mpv JavaScript API (MuJS runtime). Reference:
-// https://github.com/mpv-player/mpv/blob/master/DOCS/man/javascript.rst
-// https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst
-// https://github.com/mpv-player/mpv/blob/master/DOCS/man/lua.rst
-
 declare global {
+  /**
+   * Types for mpv JavaScript API (MuJS runtime). Reference:
+   * https://github.com/mpv-player/mpv/blob/master/DOCS/man/javascript.rst
+   * https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst
+   * https://github.com/mpv-player/mpv/blob/master/DOCS/man/lua.rst
+   */
   var mp: {
     // Scripting APIs - identical to Lua
     command(command: string): true | undefined;
@@ -26,13 +27,14 @@ declare global {
     set_property_bool(name: string, value: boolean): true | undefined;
     set_property_number(name: string, value: number): true | undefined;
     set_property_native(name: string, value: unknown): true | undefined;
-
     get_time(): number;
 
-    add_key_binding(key: string, name?: string, fn?: () => void, flags?: MP.KeyBindingFlags): void;
-    add_forced_key_binding(key: string, name?: string, fn?: () => void, flags?: MP.KeyBindingFlags): void;
+    add_key_binding(key: string, name?: string, fn?: () => void, flags?: { repeatable?: boolean; complex?: false }): void;
+    add_key_binding(key: string, name: string, fn: (e: MP.KeyEvent) => void, flags: { repeatable?: boolean; complex: true }): void;
+    add_forced_key_binding(key: string, name?: string, fn?: () => void, flags?: { repeatable?: boolean; complex?: false }): void;
+    add_forced_key_binding(key: string, name: string, fn: (e: MP.KeyEvent) => void, flags: { repeatable?: boolean; complex: true }): void;
     remove_key_binding(name: string): void;
-    register_event(name: string, fn: (event: MP.Event) => void): void;
+    register_event(name: string, fn: (e: MP.Event) => void): void;
     unregister_event(fn: (...args: unknown[]) => void): void;
     observe_property(name: string, type: "native", fn: (name: string, value: unknown) => void): void;
     observe_property(name: string, type: "bool", fn: (name: string, value: boolean | undefined) => void): void;
@@ -71,7 +73,7 @@ declare global {
 
     utils: {
       getcwd(): string | undefined;
-      readdir(path: string, filter?: MP.ReadDirFilter): string[] | undefined;
+      readdir(path: string, filter?: "files" | "dirs" | "normal" | "all"): string[] | undefined;
       file_info(path: string): MP.FileInfo | undefined;
       split_path(path: string): [string, string];
       join_path(p1: string, p2: string): string;
@@ -91,14 +93,11 @@ declare global {
       compile_js(fname: string, content_str: string): (...args: unknown[]) => unknown;
     };
 
-    add_hook(type: string, priority: number, fn: () => void): void;
-
     options: {
       read_options(obj: MP.Options, identifier?: string, on_update?: (list: MP.OptionsUpdate) => void): void;
     };
 
-    // TODO: types
-    // https://github.com/mpv-player/mpv/blob/master/DOCS/man/lua.rst#mpinput-functions
+    // TODO: https://github.com/mpv-player/mpv/blob/master/DOCS/man/lua.rst#mpinput-functions
     input: {
       get(obj: unknown): true | undefined;
       terminate(): void;
@@ -115,6 +114,7 @@ declare global {
     peek_timers_wait(): number;
 
     // Additional utilities
+    add_hook(type: string, priority: number, fn: () => void): void;
     last_error(): string;
     get_time_ms(): number;
     get_script_file(): string;
@@ -133,44 +133,31 @@ declare global {
   function exit(): void;
 }
 
-// Auxiliary types are kept in separate namespace to not be confused with official API.
+/**
+ * Auxiliary types are kept in separate namespace to not be confused with
+ * official API.
+ */
 export namespace MP {
-  type NodeArray = unknown[];
-  type NodeMap = { [key: string]: unknown };
+  type CommandArgs = unknown[] | { name: string; [key: string]: unknown };
 
-  type Option = string | boolean | number;
-  type Options = { [key: string]: Option };
-  type OptionsUpdate = { [key: string]: boolean };
+  interface KeyEvent {
+    event: "down" | "repeat" | "up" | "press";
+    is_mouse: boolean;
+    key_name: string | undefined;
+    key_text: string | undefined;
+    [key: string]: unknown; // (and may contain undocumented ones)
+  }
 
-  type LogLevel = "fatal" | "error" | "warn" | "info" | "v" | "debug" | "trace";
-  type KeyEventType = "down" | "repeat" | "up" | "press";
-  type ReadDirFilter = "files" | "dirs" | "normal" | "all";
-  type Platform = "windows" | "darwin" | "linux" | "android" | "freebsd" | string;
-
-  // TODO: fields
-  // https://mpv.io/manual/master/#list-of-events
   interface Event {
     event: string;
     id?: unknown;
     error?: string;
-    [key: string]: unknown;
+    [key: string]: unknown; // TODO: https://mpv.io/manual/master/#list-of-events
   }
 
-  interface KeyBindingFlags {
-    repeatable?: boolean;
-    complex?: boolean;
-    event?: KeyEventType;
-    is_mouse?: boolean;
-    key_name?: string;
-    key_text?: string;
-    [key: string]: unknown;
-  }
+  type LogLevel = "fatal" | "error" | "warn" | "info" | "v" | "debug" | "trace";
 
-  interface OSDOverlay {
-    data: string;
-    res_x: number;
-    res_y: number;
-    z: number;
+  interface OSDOverlay extends Prop.OSDOverlay {
     update(): void;
     remove(): void;
   }
@@ -190,7 +177,74 @@ export namespace MP {
     is_dir: boolean;
   }
 
-  type CommandArgs = NodeArray | (NodeMap & { name: string });
+  type Option = string | boolean | number;
+  type Options = { [key: string]: Option };
+  type OptionsUpdate = { [key: string]: boolean };
+
+  export import Prop = MPProp;
+  export import Cmd = MPCmd;
+}
+
+/**
+ * Properties
+ * https://mpv.io/manual/master/#property-list
+ */
+export namespace MPProp {
+  interface Encoder {
+    codec: string;
+    driver: string;
+    description: string;
+  }
+
+  interface Filter {
+    name: string;
+    label?: string;
+    enabled?: boolean;
+    params?: { [key: string]: string };
+  }
+
+  interface MousePos {
+    x: number;
+    y: number;
+    hover: boolean;
+  }
+
+  interface OSDOverlay {
+    id: number;
+    format: "ass-events" | "none";
+    data: string;
+    res_x?: number;
+    res_y?: number;
+    z?: number;
+    hidden?: boolean;
+    compute_bounds?: boolean;
+  }
+
+  type Platform = "windows" | "darwin" | "linux" | "android" | "freebsd" | string;
+
+  interface Track {
+    id: number;
+    type: "video" | "audio" | "sub";
+    selected: boolean;
+    external: boolean;
+    "external-filename": string;
+    [key: string]: unknown; // TODO: https://mpv.io/manual/master/#command-interface-track-list
+  }
+
+  interface VideoParams {
+    w: number;
+    h: number;
+    dw: number;
+    dh: number;
+    [key: string]: unknown; // TODO: https://mpv.io/manual/master/#command-interface-video-params
+  }
+}
+
+/**
+ * Command args and results
+ * https://mpv.io/manual/master/#list-of-input-commands
+ */
+export namespace MPCmd {
   type SubprocessArgs = {
     name: "subprocess";
     args: string[];
@@ -209,41 +263,5 @@ export namespace MP {
     stderr: string;
     error_string: string;
     killed_by_us: boolean;
-  }
-
-  interface MousePos {
-    x: number;
-    y: number;
-    hover: boolean;
-  }
-
-  // TODO: fields
-  // https://mpv.io/manual/master/#command-interface-video-params
-  interface VideoParams {
-    w: number;
-    h: number;
-    dw: number;
-    dh: number;
-  }
-
-  interface Track {
-    id: number;
-    type: "video" | "audio" | "sub";
-    selected: boolean;
-    external: boolean;
-    "external-filename": string;
-  }
-
-  interface Filter {
-    name: string;
-    label?: string;
-    enabled?: boolean;
-    params?: { [key: string]: string };
-  }
-
-  interface Encoder {
-    codec: string;
-    driver: string;
-    description: string;
   }
 }
