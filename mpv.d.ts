@@ -29,9 +29,11 @@ declare global {
     set_property_native(name: string, value: unknown): true | undefined;
     get_time(): number;
 
-    add_key_binding(key: string, name?: string, fn?: () => void, flags?: { repeatable?: boolean; complex?: false }): void;
+    add_key_binding(key: string, fn: () => void): void;
+    add_key_binding(key: string, name: string, fn: () => void, flags?: { repeatable?: boolean; complex?: false }): void;
     add_key_binding(key: string, name: string, fn: (e: MP.KeyEvent) => void, flags: { repeatable?: boolean; complex: true }): void;
-    add_forced_key_binding(key: string, name?: string, fn?: () => void, flags?: { repeatable?: boolean; complex?: false }): void;
+    add_forced_key_binding(key: string, fn: () => void): void;
+    add_forced_key_binding(key: string, name: string, fn: () => void, flags?: { repeatable?: boolean; complex?: false }): void;
     add_forced_key_binding(key: string, name: string, fn: (e: MP.KeyEvent) => void, flags: { repeatable?: boolean; complex: true }): void;
     remove_key_binding(name: string): void;
     register_event(name: string, fn: (e: MP.Event) => void): void;
