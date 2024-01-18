@@ -261,8 +261,8 @@ export namespace MPCmd {
   };
   interface SubprocessResult {
     status: number;
-    stdout: string;
-    stderr: string;
+    stdout?: string;
+    stderr?: string;
     error_string: string;
     killed_by_us: boolean;
   }
