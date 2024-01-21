@@ -45,7 +45,7 @@ declare global {
     observe_property(name: string, type: "none" | undefined, fn: (name: string) => void): void;
     unobserve_property(fn: (...args: unknown[]) => void): void;
 
-    get_opt(key: string): string;
+    get_opt(key: string): string | undefined;
     get_script_name(): string;
     get_script_directory(): string;
     osd_message(text: string, duration?: number): void;
