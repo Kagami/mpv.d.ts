@@ -10,7 +10,7 @@ declare global {
     command(command: string): true | undefined;
     commandv(...args: string[]): true | undefined;
     command_native(table: MP.CommandArgs): unknown;
-    command_native_async(table: MP.CommandArgs, fn?: (success: boolean, result: unknown, error: string) => void): unknown;
+    command_native_async(table: MP.CommandArgs, fn?: (success: boolean, result: any, error: string) => void): unknown;
     abort_async_command(id: unknown): void;
 
     del_property(name: string): true | undefined;
@@ -37,13 +37,13 @@ declare global {
     add_forced_key_binding(key: string, name: string, fn: (e: MP.KeyEvent) => void, flags: { repeatable?: boolean; complex: true }): void;
     remove_key_binding(name: string): void;
     register_event(name: string, fn: (e: MP.Event) => void): void;
-    unregister_event(fn: (...args: unknown[]) => void): void;
-    observe_property(name: string, type: "native", fn: (name: string, value: unknown) => void): void;
+    unregister_event(fn: (...args: any[]) => void): void;
+    observe_property(name: string, type: "native", fn: (name: string, value: any) => void): void;
     observe_property(name: string, type: "bool", fn: (name: string, value: boolean | undefined) => void): void;
     observe_property(name: string, type: "string", fn: (name: string, value: string | undefined) => void): void;
     observe_property(name: string, type: "number", fn: (name: string, value: number | undefined) => void): void;
     observe_property(name: string, type: "none" | undefined, fn: (name: string) => void): void;
-    unobserve_property(fn: (...args: unknown[]) => void): void;
+    unobserve_property(fn: (...args: any[]) => void): void;
 
     get_opt(key: string): string | undefined;
     get_script_name(): string;
@@ -54,7 +54,7 @@ declare global {
     register_idle(fn: () => void): void;
     unregister_idle(fn: () => void): void;
     enable_messages(level: MP.LogLevel): void;
-    register_script_message(name: string, fn: (...args: unknown[]) => void): void;
+    register_script_message(name: string, fn: (...args: any[]) => void): void;
     unregister_script_message(name: string): void;
 
     create_osd_overlay(format: "ass-events" | "none"): MP.OSDOverlay;
